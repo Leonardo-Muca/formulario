@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, Alert, Platform, PermissionsAndroid } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { theme } from '../styles/theme';
 
@@ -24,6 +24,27 @@ export const MediaPicker: React.FC<MediaPickerProps> = ({ value, onChange }) => 
     return true;
   };
 
+  const requestMicrophonePermission = async () => {
+    if (Platform.OS === 'android') {
+      try {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
+          {
+            title: 'Permiso de Micrófono',
+            message: 'Necesitamos acceso a tu micrófono para poder grabar videos con sonido.',
+            buttonNegative: 'Cancelar',
+            buttonPositive: 'Aceptar',
+          }
+        );
+        return granted === PermissionsAndroid.RESULTS.GRANTED;
+      } catch (err) {
+        console.warn('Error al solicitar permiso de micrófono:', err);
+        return false;
+      }
+    }
+    return true;
+  };
+
   const requestLibraryPermission = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
@@ -37,41 +58,69 @@ export const MediaPicker: React.FC<MediaPickerProps> = ({ value, onChange }) => 
     const hasPermission = await requestCameraPermission();
     if (!hasPermission) return;
 
-    const result = await ImagePicker.launchCameraAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      quality: 0.8,
-    });
+    try {
+      console.log('Iniciando captura de foto...');
+      const result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ['images'],
+        quality: 0.8,
+      });
 
-    if (!result.canceled && result.assets && result.assets.length > 0) {
-      const asset = result.assets[0];
-      const filename = asset.uri.split('/').pop() || `photo-${Date.now()}.jpg`;
-      const newFile: MediaFile = {
-        uri: asset.uri,
-        type: 'image',
-        name: filename,
-      };
-      onChange([...value, newFile]);
+      console.log('Resultado de foto:', JSON.stringify(result));
+
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        const asset = result.assets[0];
+        const filename = asset.uri.split('/').pop() || `photo-${Date.now()}.jpg`;
+        const newFile: MediaFile = {
+          uri: asset.uri,
+          type: 'image',
+          name: filename,
+        };
+        onChange([...value, newFile]);
+        console.log('Foto agregada:', newFile);
+      } else {
+        console.log('Captura de foto cancelada o sin assets.');
+      }
+    } catch (err) {
+      console.error('Error al tomar foto:', err);
+      Alert.alert('Error', 'Hubo un error al tomar la foto: ' + String(err));
     }
   };
 
   const handleRecordVideo = async () => {
-    const hasPermission = await requestCameraPermission();
-    if (!hasPermission) return;
+    const hasCameraPerm = await requestCameraPermission();
+    if (!hasCameraPerm) return;
 
-    const result = await ImagePicker.launchCameraAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Videos,
-      quality: 0.8,
-    });
+    const hasAudioPerm = await requestMicrophonePermission();
+    if (!hasAudioPerm) {
+      Alert.alert('Permiso denegado', 'Necesitamos acceso al micrófono para grabar videos con audio.');
+      return;
+    }
 
-    if (!result.canceled && result.assets && result.assets.length > 0) {
-      const asset = result.assets[0];
-      const filename = asset.uri.split('/').pop() || `video-${Date.now()}.mp4`;
-      const newFile: MediaFile = {
-        uri: asset.uri,
-        type: 'video',
-        name: filename,
-      };
-      onChange([...value, newFile]);
+    try {
+      console.log('Iniciando grabación de video...');
+      const result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ['videos'],
+        quality: 0.8,
+      });
+
+      console.log('Resultado de video:', JSON.stringify(result));
+
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        const asset = result.assets[0];
+        const filename = asset.uri.split('/').pop() || `video-${Date.now()}.mp4`;
+        const newFile: MediaFile = {
+          uri: asset.uri,
+          type: 'video',
+          name: filename,
+        };
+        onChange([...value, newFile]);
+        console.log('Video agregado:', newFile);
+      } else {
+        console.log('Grabación de video cancelada o sin assets.');
+      }
+    } catch (err) {
+      console.error('Error al grabar video:', err);
+      Alert.alert('Error', 'Hubo un error al grabar el video: ' + String(err));
     }
   };
 
@@ -80,7 +129,7 @@ export const MediaPicker: React.FC<MediaPickerProps> = ({ value, onChange }) => 
     if (!hasPermission) return;
 
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      mediaTypes: ['images', 'videos'],
       allowsMultipleSelection: true,
       quality: 0.8,
     });

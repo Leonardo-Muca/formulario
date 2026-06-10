@@ -41,7 +41,10 @@ export const formSchema = z.object({
     }
   }
 
-  if (data.startDate > data.endDate) {
+  const start = new Date(data.startDate.getFullYear(), data.startDate.getMonth(), data.startDate.getDate());
+  const end = new Date(data.endDate.getFullYear(), data.endDate.getMonth(), data.endDate.getDate());
+
+  if (start > end) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
       message: 'La fecha de fin debe ser posterior o igual a la fecha de inicio',

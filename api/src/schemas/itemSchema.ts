@@ -44,12 +44,17 @@ export const itemSchema = z.object({
     });
   }
 
-  if (startValid && endValid && data.startDate > data.endDate) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      message: 'La fecha de fin debe ser posterior o igual a la fecha de inicio',
-      path: ['endDate'],
-    });
+  if (startValid && endValid) {
+    const start = new Date(data.startDate.getFullYear(), data.startDate.getMonth(), data.startDate.getDate());
+    const end = new Date(data.endDate.getFullYear(), data.endDate.getMonth(), data.endDate.getDate());
+
+    if (start > end) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'La fecha de fin debe ser posterior o igual a la fecha de inicio',
+        path: ['endDate'],
+      });
+    }
   }
 });
 export type ParsedItem = z.infer<typeof itemSchema>;

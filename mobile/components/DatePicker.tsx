@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Modal, Platform } from 'react-native';
-import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
+import DateTimePicker, { DateTimePickerChangeEvent } from '@react-native-community/datetimepicker';
 import { theme } from '../styles/theme';
 
 interface DatePickerProps {
@@ -21,14 +21,14 @@ export const DatePicker: React.FC<DatePickerProps> = ({ value, onChange, label }
     });
   };
 
-  const handleAndroidChange = (event: DateTimePickerEvent, selectedDate?: Date) => {
+  const handleAndroidValueChange = (event: DateTimePickerChangeEvent, selectedDate?: Date) => {
     setShow(false);
-    if (selectedDate && event.type === 'set') {
+    if (selectedDate) {
       onChange(selectedDate);
     }
   };
 
-  const handleIOSChange = (event: DateTimePickerEvent, selectedDate?: Date) => {
+  const handleIOSValueChange = (event: DateTimePickerChangeEvent, selectedDate?: Date) => {
     if (selectedDate) {
       setTempDate(selectedDate);
     }
@@ -57,7 +57,8 @@ export const DatePicker: React.FC<DatePickerProps> = ({ value, onChange, label }
           value={value}
           mode="date"
           display="default"
-          onChange={handleAndroidChange}
+          onValueChange={handleAndroidValueChange}
+          onDismiss={() => setShow(false)}
         />
       )}
 
@@ -89,7 +90,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({ value, onChange, label }
                   mode="date"
                   display="spinner"
                   textColor={theme.colors.text}
-                  onChange={handleIOSChange}
+                  onValueChange={handleIOSValueChange}
                 />
               </View>
             </View>

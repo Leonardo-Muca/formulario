@@ -22,7 +22,15 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "@react-native-community/datetimepicker"
+      "@react-native-community/datetimepicker",
+      [
+        "expo-image-picker",
+        {
+          "cameraPermission": "Necesitamos acceso a tu cámara para tomar fotos y grabar videos.",
+          "microphonePermission": "Necesitamos acceso a tu micrófono para grabar el audio de tus videos.",
+          "photosPermission": "Necesitamos acceso a tu galería para poder seleccionar fotos y videos."
+        }
+      ]
     ]
   }
 }

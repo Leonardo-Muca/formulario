@@ -9,8 +9,8 @@ import {
   Platform,
   ActivityIndicator,
   Modal,
-  SafeAreaView,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Controller } from 'react-hook-form';
 import { StatusBar } from 'expo-status-bar';
 

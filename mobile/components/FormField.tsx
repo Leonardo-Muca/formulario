@@ -32,13 +32,11 @@ const styles = StyleSheet.create({
   },
   childContainer: {
     borderRadius: theme.borderRadius.md,
-    overflow: 'hidden',
   },
   childContainerError: {
     borderRadius: theme.borderRadius.md,
     borderWidth: 1.5,
     borderColor: theme.colors.error,
-    overflow: 'hidden',
   },
   errorText: {
     color: theme.colors.error,
