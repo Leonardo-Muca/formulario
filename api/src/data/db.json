@@ -1,0 +1,40 @@
+[
+  {
+    "id": "192929fc-327c-45ba-8398-4fb326a90ee1",
+    "name": "Zapas",
+    "description": "Zapas desc",
+    "price": 10,
+    "offerType": "Descuento en dinero",
+    "discountValue": 2,
+    "startDate": "2026-06-10T05:20:55.225Z",
+    "endDate": "2026-06-11T05:20:55.225Z",
+    "multimedia": [
+      {
+        "filename": "multimedia-1781224559928-690141228.png",
+        "originalName": "99c3aae2-1e81-4911-a903-036e6c19f7a2.png",
+        "mimetype": "image/jpeg",
+        "size": 1444567,
+        "url": "/uploads/multimedia-1781224559928-690141228.png"
+      }
+    ]
+  },
+  {
+    "id": "5bbd04a7-c058-4a42-bfef-739c5f5b9523",
+    "name": "Zapas",
+    "description": "Zapas",
+    "price": 10,
+    "offerType": "Descuento en dinero",
+    "discountValue": 5,
+    "startDate": "2026-06-12T00:34:11.682Z",
+    "endDate": "2026-06-13T00:34:11.682Z",
+    "multimedia": [
+      {
+        "filename": "multimedia-1781224466102-836924993.heic",
+        "originalName": "C6168C79-5EC3-40CA-8625-5D70D44B6C4E.heic",
+        "mimetype": "image/heic",
+        "size": 2808983,
+        "url": "/uploads/multimedia-1781224466102-836924993.heic"
+      }
+    ]
+  }
+]

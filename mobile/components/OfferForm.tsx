@@ -21,7 +21,17 @@ import { MediaPicker } from './MediaPicker';
 import { useOfferForm } from '../hooks/useOfferForm';
 import { styles } from './OfferForm.styles';
 
-export const OfferForm: React.FC = () => {
+interface OfferFormProps {
+  promoId?: string;
+  onBack: () => void;
+  onSuccess: () => void;
+}
+
+export const OfferForm: React.FC<OfferFormProps> = ({
+  promoId,
+  onBack,
+  onSuccess,
+}) => {
   const {
     control,
     handleSubmit,
@@ -33,21 +43,37 @@ export const OfferForm: React.FC = () => {
     setShowDropdown,
     handleSelectOfferType,
     onSubmit,
-  } = useOfferForm();
+  } = useOfferForm(promoId, onSuccess);
 
   const selectedOfferType = watch('offerType');
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar style="light" />
+
+      {/* Custom Header Navbar */}
+      <View style={styles.navbar}>
+        <TouchableOpacity style={styles.backButton} onPress={onBack} activeOpacity={0.7}>
+          <Text style={styles.backButtonText}>← Volver</Text>
+        </TouchableOpacity>
+        <Text style={styles.navbarTitle}>
+          {promoId ? 'Editar Oferta' : 'Crear Oferta'}
+        </Text>
+        <View style={{ width: 80 }} />
+      </View>
+
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardView}
       >
         <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
           <View style={styles.header}>
-            <Text style={styles.title}>Crear Oferta</Text>
-            <Text style={styles.subtitle}>Completa los datos para registrar un nuevo item</Text>
+            <Text style={styles.title}>{promoId ? 'Editar Oferta' : 'Crear Oferta'}</Text>
+            <Text style={styles.subtitle}>
+              {promoId
+                ? 'Modifica los campos del item seleccionado'
+                : 'Completa los datos para registrar un nuevo item'}
+            </Text>
           </View>
 
           {successMessage && (
@@ -210,7 +236,9 @@ export const OfferForm: React.FC = () => {
             {loading ? (
               <ActivityIndicator color="#FFF" />
             ) : (
-              <Text style={styles.submitButtonText}>Guardar Item</Text>
+              <Text style={styles.submitButtonText}>
+                {promoId ? 'Actualizar Oferta' : 'Guardar Item'}
+              </Text>
             )}
           </TouchableOpacity>
         </ScrollView>

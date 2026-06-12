@@ -152,4 +152,27 @@ export const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
+  navbar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: theme.spacing.md,
+    height: 56,
+    borderBottomWidth: 1,
+    borderColor: theme.colors.border,
+  },
+  backButton: {
+    width: 80,
+    justifyContent: 'center',
+  },
+  backButtonText: {
+    color: theme.colors.primaryLight,
+    ...theme.typography.bodyBold,
+    fontSize: 14,
+  },
+  navbarTitle: {
+    color: theme.colors.text,
+    ...theme.typography.h2,
+    fontSize: 16,
+  },
 });

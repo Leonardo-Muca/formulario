@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Platform, Alert } from 'react-native';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -61,7 +61,7 @@ const API_URL = Platform.select({
   default: 'http://localhost:3000/api/items',
 });
 
-export function useOfferForm() {
+export function useOfferForm(promoId?: string, onSuccess?: () => void) {
   const [loading, setLoading] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -82,6 +82,40 @@ export function useOfferForm() {
 
   const { reset, setValue } = formMethods;
 
+  // Fetch promotion data to populate the form if we are in Edit Mode
+  useEffect(() => {
+    if (promoId) {
+      const loadPromoToEdit = async () => {
+        setLoading(true);
+        try {
+          const response = await fetch(`${API_URL}/${promoId}`);
+          const result = await response.json();
+          if (result.success && result.data) {
+            const promo = result.data;
+            reset({
+              name: promo.name,
+              description: promo.description,
+              price: String(promo.price),
+              offerType: promo.offerType,
+              discountValue: String(promo.discountValue),
+              multimedia: promo.multimedia, // Array of existing media files with urls
+              startDate: new Date(promo.startDate),
+              endDate: new Date(promo.endDate),
+            });
+          } else {
+            Alert.alert('Error', 'No se pudo cargar la información de la oferta.');
+          }
+        } catch (error) {
+          console.error('Error loading promo details:', error);
+          Alert.alert('Error de Conexión', 'No se pudo conectar con el servidor.');
+        } finally {
+          setLoading(false);
+        }
+      };
+      loadPromoToEdit();
+    }
+  }, [promoId, reset]);
+
   const handleSelectOfferType = (type: 'Descuento en dinero' | 'Descuento en porcentaje') => {
     setValue('offerType', type, { shouldValidate: true });
     setValue('discountValue', '', { shouldValidate: false });
@@ -91,6 +125,10 @@ export function useOfferForm() {
   const onSubmit = async (data: FormValues) => {
     setLoading(true);
     setSuccessMessage(null);
+
+    const isEditMode = !!promoId;
+    const requestUrl = isEditMode ? `${API_URL}/${promoId}` : API_URL!;
+    const method = isEditMode ? 'PUT' : 'POST';
 
     try {
       const formData = new FormData();
@@ -102,12 +140,27 @@ export function useOfferForm() {
       formData.append('startDate', data.startDate.toISOString());
       formData.append('endDate', data.endDate.toISOString());
 
-      data.multimedia.forEach((file: MediaFile, index: number) => {
+      // Separate existing files (with URL) from new uploads (local file pickups)
+      const retainedFiles: any[] = [];
+      const newUploads: any[] = [];
+
+      data.multimedia.forEach((file: any) => {
+        if (file.url) {
+          retainedFiles.push(file);
+        } else {
+          newUploads.push(file);
+        }
+      });
+
+      // Append existing files as JSON
+      formData.append('existingMultimedia', JSON.stringify(retainedFiles));
+
+      // Append new files
+      newUploads.forEach((file: MediaFile, index: number) => {
         const fileUri = file.uri;
         const filename = file.name || `file-${index}.${file.type === 'video' ? 'mp4' : 'jpg'}`;
         const type = file.type === 'video' ? 'video/mp4' : 'image/jpeg';
 
-        // Native uploader bridge object format
         formData.append('multimedia', {
           uri: fileUri,
           type,
@@ -115,19 +168,33 @@ export function useOfferForm() {
         } as any);
       });
 
-      console.log('Enviando datos (XHR) a:', API_URL);
+      console.log(`Enviando datos (${method} XHR) a:`, requestUrl);
 
       const xhr = new XMLHttpRequest();
-      xhr.open('POST', API_URL!);
+      xhr.open(method, requestUrl);
 
       xhr.onload = () => {
         setLoading(false);
         try {
           const responseData = JSON.parse(xhr.responseText);
           if (xhr.status >= 200 && xhr.status < 300) {
-            setSuccessMessage('¡Item de oferta creado exitosamente en el servidor!');
-            Alert.alert('Éxito', 'El formulario ha sido procesado y guardado correctamente.');
-            reset();
+            setSuccessMessage(
+              isEditMode
+                ? '¡Item de oferta actualizado exitosamente!'
+                : '¡Item de oferta creado exitosamente!'
+            );
+            Alert.alert(
+              'Éxito',
+              isEditMode
+                ? 'La oferta ha sido actualizada correctamente.'
+                : 'El formulario ha sido procesado y guardado correctamente.'
+            );
+            if (!isEditMode) {
+              reset();
+            }
+            if (onSuccess) {
+              onSuccess();
+            }
           } else {
             const errorMsg = responseData.message || 'Error desconocido del servidor';
             Alert.alert('Error de Servidor', errorMsg);
@@ -143,7 +210,7 @@ export function useOfferForm() {
         console.error('Error de red al enviar el formulario (XHR):', e);
         Alert.alert(
           'Error de Conexión',
-          'No se pudo conectar con el servidor API. Asegúrate de que el backend está corriendo y tu dirección IP es correcta.'
+          'No se pudo conectar con el servidor API. Asegúrate de que el backend está corriendo.'
         );
       };
 
@@ -153,7 +220,7 @@ export function useOfferForm() {
       console.error('Error de red al enviar el formulario:', error);
       Alert.alert(
         'Error de Conexión',
-        'No se pudo conectar con el servidor API. Asegúrate de que el backend está corriendo y tu dirección IP es correcta.'
+        'No se pudo conectar con el servidor API. Asegúrate de que el backend está corriendo.'
       );
     }
   };
