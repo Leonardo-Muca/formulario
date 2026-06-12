@@ -11,6 +11,7 @@ import {
   Platform,
   Dimensions,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { theme } from '../styles/theme';
 import { PromoItem } from './PromoCard';
 
@@ -146,7 +147,7 @@ export const PromoDetail: React.FC<PromoDetailProps> = ({
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
       {/* Custom Navbar */}
       <View style={styles.navbar}>
         <TouchableOpacity style={styles.backButton} onPress={onBack} activeOpacity={0.7}>
@@ -281,7 +282,7 @@ export const PromoDetail: React.FC<PromoDetailProps> = ({
           </TouchableOpacity>
         </View>
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 };
 

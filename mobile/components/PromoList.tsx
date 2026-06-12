@@ -8,6 +8,7 @@ import {
   FlatList,
   ActivityIndicator,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { theme } from '../styles/theme';
 import { PromoCard, PromoItem } from './PromoCard';
 import { usePromoList, FilterType } from '../hooks/usePromoList';
@@ -58,7 +59,7 @@ export const PromoList: React.FC<PromoListProps> = ({
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.title}>Ofertas Activas</Text>
@@ -127,7 +128,7 @@ export const PromoList: React.FC<PromoListProps> = ({
       >
         <Text style={styles.fabText}>+</Text>
       </TouchableOpacity>
-    </View>
+    </SafeAreaView>
   );
 };
 
